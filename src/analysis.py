@@ -15,12 +15,6 @@ HAC_LAGS = 6
 MONTHS = 12
 TURNOVER_GRID = [0.2, 0.4, 0.6, 0.8, 1.0]
 
-SUB_PERIODS = {
-    '1963-1984': ('1963-07', '1984-12'),
-    '1985-2005': ('1985-01', '2005-12'),
-    '2006-2026': ('2006-01', '2026-05'),
-}
-
 
 def run_regression(data, regressors, lags=HAC_LAGS):
     """regress on given factors with HAC errors"""
@@ -76,28 +70,6 @@ def break_even_costs(data, turnovers=TURNOVER_GRID):
 
 
 
-def sub_period_alphas(data, periods=SUB_PERIODS):
-    """FF4 alpha estimated separately on three non-overlapping blocks.
-
-    Blocks of roughly equal length, so each estimate rests on a comparable
-    number of observations. Each holds about a third of the sample, so
-    t-statistics fall by a factor of about sqrt(3) even if the effect is
-    unchanged.
-    """
-    rows = {}
-    for label, (start, end) in periods.items():
-        block = data.loc[start:end]
-        fit = run_regression(block, MODELS['FF4'])
-        low, high = fit.conf_int().loc['const']
-        rows[label] = {
-            'months': len(block),
-            'alpha (ann. %)': fit.params['const'] * MONTHS * 100,
-            'CI low': low * MONTHS * 100,
-            'CI high': high * MONTHS * 100,
-            't-stat': fit.tvalues['const'],
-            'Mom': fit.params['Mom'],
-        }
-    return pd.DataFrame(rows).T
 
 def main():
     data = build_dataset()
@@ -126,9 +98,6 @@ def main():
     print("-----------------------------------------")
     print("Break-even transaction costs (FF4 alpha):")
     print(break_even_costs(data).round(1), "\n")
-    print("-----------------------------------------")
-    print("FF4 alpha by sub-period:")
-    print(sub_period_alphas(data).round(3), "\n")
 
 
 if __name__ == '__main__':
