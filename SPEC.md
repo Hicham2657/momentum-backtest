@@ -54,7 +54,7 @@ Fixed here and run once.
 
 - Transaction costs: a constant monthly cost shifts the regression intercept without affecting the loadings, so net alpha equals gross alpha minus turnover times cost. Turnover is not observable from these data. A grid of monthly turnover assumptions is therefore applied (from 20% up to 100% turnover), and the break-even cost (the level at which net alpha reaches zero) is reported for each. A single cost is applied to both legs, which is optimistic because costs are naturally higher on the short leg.
 - Comparison with `Mom`: correlation and difference in annualised means, to quantify how much of the strategy is the published factor in a more extreme form.
-- Sub-periods: three non overlapping blocks of roughly equal length (1963-1984, 1985-2005, 2006-2026), so that each estimate rests on a  comparable number of observations. FF4 is rerun on each. Each block holds about a third of the sample, so t-statistics are expected to fall by a factor of about sqrt(3).
+- Sub-periods (added after the regressions): three non overlapping blocks of roughly equal length (1963-1984, 1985-2005, 2006-2026), so that each estimate rests on a  comparable number of observations. FF4 is rerun on each. Each block holds about a third of the sample, so t-statistics are expected to fall by a factor of about $\sqrt3$.
 
 ## Limitations
 - My project does not build signal from raw prices. The portfolios are supplied pre-built

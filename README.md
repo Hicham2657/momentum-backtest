@@ -1,8 +1,10 @@
 # Momentum: where does the alpha go?
 
-Buy last year's winners, short last year's losers, rebalance monthly. On US stocks from 1963 to 2026 that returns 14.4% a year before costs.
+An allocator who is shown a momentum track record has one decision to make: pay the manager, or buy the published factor in an ETF for a few basis points and stop there. The manager is only worth paying if his implementation beats the premium.
 
-Regressed on the four F-F standard factors, 81% of it is the published momentum factor. The 4.3% left over is just the same factor, more concentrated. And it doesn't survive realistic trading costs.
+My project runs that decision on a classic strategy: buy last year's winners and short last year's losers, rebalance monthly, on US stocks from 1963 to 2026. This generates 14.4% annualized before costs. When regressed on the market, Fama-French and Carhart ("Mom") factors, most of it is the published momentum factor. I found 4.3% left over unexplained returns; however it is just the same factor held in a more concentrated form rather than a better implementation, and it does not survive realistic trading costs.
+
+I didn't build the signal myself; what I compare is a concentrated version of the premium (decile 10 minus decile 1) against the published factor ("Mom"), which is a 2x3 sort averaged across size groups. The question is whether this version adds anything to the factor an allocator could already buy.
 
 My work is documented step by step in this repo. Every choice was written down in [SPEC.md](SPEC.md) and committed before I ran a regression.
 
@@ -24,7 +26,7 @@ My strategy is the top decile minus the bottom decile: long past winners, short 
 
 The middle of the ranking is flat. Deciles 2 to 9 all sit within a narrow band around 0.96% per month (the average), and the ordering inside that band is not even monotonic. The entire spread comes from the two extremes: the Lo decile at 0.34% and the Hi decile at 1.53%.
 
-## The regressions (models components are in [SPEC.md](SPEC.md))
+## The regressions (model components are in [SPEC.md](SPEC.md))
 
 Each model adds a factor to the list of things treated as ordinary exposure. The intercept is what remains unexplained. I use Newey-West HAC standard errors, because monthly stock returns don't have constant variance (i.e heteroskedastic) and aren't independent from one month to the next (i.e autocorrelated); plain OLS standard errors would be too small and would make everything look more significant than it is (inflated t-statistics).
 
@@ -62,7 +64,7 @@ A Sharpe ratio of 0.57 doesn't tell much on its own here. The distribution is no
 
 ![Cumulative performance](figures/cumulative_performance.png)
 
-April 2009 alone cost 45.2% in a single month
+The two plots show the same returns under two conventions. The top one keeps the position size constant every month, so the slope is the arithmatic average monthly return: steady until 2000, flatter afterwards. The bottom one reinvests the gains.
 
 ## Is the alpha stable over time?
 
@@ -108,10 +110,9 @@ Which means the leg supplying a big part of the gross return is also the one mad
 
 ## What this does not show
 
-- **I didn't build the signal myself**; The portfolios come pre-built from the Library, so survivorship and delisting are already handled, not by me
-- **No borrow costs**
+- **Survivorship bias is already handled, not by me.** My portfolios come from the Kenneth French Data Library which keeps delisted stocks and their delisting returns, so the bias is not there. A company that disappears is almost always one that collapsed, so it belongs in the Lo decile. If the data dropped those names, the Lo decile would show higher returns and the Hi minus Lo spread would be lower; that means an underestimation of the strategy returns. If I built the signal from raw prices, I would first have to verify whether the data keeps delisted tickers
+- **Even with delisted names included, part of the short leg may not be reachable**, because those stocks have collapsed in market cap and liquidity, so borrowing them is expensive or impossible. The measured return on the short leg is an upper bound on what could actually be captured, and is purely theoretical in practice
 - **Stability is tested but not resolved** because of the sub-period intervals being too wide
-- **No evidence about today**
 
 ## Running it
 
