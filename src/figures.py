@@ -61,19 +61,28 @@ def plot_average_firm_size(size):
 
 
 def plot_cumulative(returns):
-    cumulative = (1 + returns).cumprod()
     crash = pd.Timestamp('2009-04-01')
-    fig, ax = plt.subplots(figsize=(9, 4.5))
-    ax.plot(cumulative.index, cumulative.values, color=BLUE, linewidth=1)
-    ax.set_yscale('log')
-    ax.axvspan(pd.Timestamp('2008-09-01'), pd.Timestamp('2009-12-01'),
-               color=RED, alpha=0.15)
-    ax.annotate('April 2009: -45.2% in one month',
-                xy=(crash, cumulative.at[crash]),
-                xytext=(0.55, 0.25), textcoords='axes fraction',
-                arrowprops=dict(arrowstyle='->', color='#5F5E5A'), fontsize=9)
-    ax.set_ylabel('Growth (log scale)')
-    ax.set_title('Cumulative gross performance, HI minus LO')
+    summed = returns.cumsum()
+    compounded = (1 + returns).cumprod()
+
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(9, 6.5), sharex=True)
+
+    for ax in (ax1, ax2):
+        ax.axvspan(pd.Timestamp('2008-09-01'), pd.Timestamp('2009-12-01'), color=RED, alpha=0.15)
+
+    ax1.plot(summed.index, summed.values, color=BLUE, linewidth=1)
+    ax1.set_ylabel('Cumulative sum of returns (%)')
+    ax1.set_title('one unit of exposure every month')
+
+    ax2.plot(compounded.index, compounded.values, color=BLUE, linewidth=1)
+    ax2.set_ylabel('Growth of 1 unit invested')
+    ax2.set_title('Compounded: gains reinvested')
+    ax2.annotate('April 2009: -45.2% in one month',
+                 xy=(crash, compounded.at[crash]),
+                 xytext=(0.55, 0.7), textcoords='axes fraction',
+                 arrowprops=dict(arrowstyle='->', color='#5F5E5A'), fontsize=9)
+
+    fig.suptitle('Cumulative gross performance, Hi minus Lo')
     fig.tight_layout()
     fig.savefig(OUTDIR / 'cumulative_performance.png', dpi=150)
     return fig
